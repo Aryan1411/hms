@@ -1,20 +1,80 @@
-# Importing necessary libraries
 from flask import Flask
+from flask_cors import CORS
+from flask_mail import Mail
 from application.database import db
+from celery import Celery
+import application.config as config
 
+def make_celery(app):
+    celery = Celery(
+        app.import_name,
+        backend=app.config['CELERY_RESULT_BACKEND'],
+        broker=app.config['CELERY_BROKER_URL']
+    )
+    celery.conf.update(app.config)
 
-# Initializing the Flask application
-app= Flask(__name__)
+    class ContextTask(celery.Task):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
 
-# Configuring the database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-db.init_app(app)
-app.app_context().push()
-db.create_all()
+    celery.Task = ContextTask
+    return celery
 
-from application.models import *
-from application.controllers import *
+def create_app():
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hms.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['CELERY_BROKER_URL'] = config.CELERY_BROKER_URL
+    app.config['CELERY_RESULT_BACKEND'] = config.CELERY_RESULT_BACKEND
+    
+    # Flask-Mail configuration
+    app.config['MAIL_SERVER'] = config.MAIL_SERVER
+    app.config['MAIL_PORT'] = config.MAIL_PORT
+    app.config['MAIL_USE_TLS'] = config.MAIL_USE_TLS
+    app.config['MAIL_USERNAME'] = config.MAIL_USERNAME
+    app.config['MAIL_PASSWORD'] = config.MAIL_PASSWORD
+    app.config['MAIL_DEFAULT_SENDER'] = config.MAIL_DEFAULT_SENDER
+
+    CORS(app)
+    db.init_app(app)
+    
+    # Initialize Flask-Mail
+    mail = Mail(app)
+    
+    # Initialize mail in tasks module
+    import application.tasks as tasks
+    tasks.init_mail(app)
+
+    celery = make_celery(app)
+
+    with app.app_context():
+        # Import models to ensure they are registered
+        from application.models import User, Doctor, Patient, Appointment, Treatment
+        db.create_all()
+
+        # Create admin user if not exists
+        if not User.query.filter_by(role='admin').first():
+            admin = User(username='admin', role='admin', email='admin@hms.com')
+            admin.set_password('admin123')
+            db.session.add(admin)
+            db.session.commit()
+            print("Admin user created.")
+
+    # Register Blueprints
+    from application.routes.auth import auth_bp
+    from application.routes.admin import admin_bp
+    from application.routes.doctor import doctor_bp
+    from application.routes.patient import patient_bp
+
+    app.register_blueprint(auth_bp, url_prefix='/auth')
+    app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(doctor_bp, url_prefix='/doctor')
+    app.register_blueprint(patient_bp, url_prefix='/patient')
+
+    return app, celery
+
+app, celery = create_app()
 
 if __name__ == '__main__':
     app.run(debug=True)
