@@ -71,6 +71,10 @@ def book_slot():
     db.session.add(appointment)
     db.session.commit()
     
+    # Send confirmation email
+    from application.tasks import send_booking_confirmation
+    send_booking_confirmation.delay(appointment.id)
+    
     return jsonify({'message': 'Appointment booked successfully'}), 201
 
 @patient_bp.route('/doctors', methods=['GET'])
@@ -92,6 +96,10 @@ def book_appointment():
     appointment = Appointment(doctor_id=doctor_id, patient_id=patient_id, date=date_obj, time=time_obj)
     db.session.add(appointment)
     db.session.commit()
+    
+    # Send confirmation email
+    from application.tasks import send_booking_confirmation
+    send_booking_confirmation.delay(appointment.id)
     
     return jsonify({'message': 'Appointment booked'}), 201
 

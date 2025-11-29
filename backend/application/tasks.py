@@ -29,6 +29,44 @@ def init_mail(app):
     global mail
     mail = Mail(app)
 
+@celery.task(name='tasks.send_booking_confirmation')
+def send_booking_confirmation(appointment_id):
+    """Send booking confirmation email to patient"""
+    from app import create_app
+    app, _ = create_app()
+    
+    with app.app_context():
+        try:
+            appointment = Appointment.query.get(appointment_id)
+            if not appointment:
+                return "Appointment not found"
+                
+            patient = appointment.patient
+            doctor = appointment.doctor
+            user = User.query.get(patient.user_id)
+            
+            if not user or not user.username:
+                return "User email not found"
+                
+            html_body = render_template('email/booking_confirmation.html',
+                patient_name=patient.name,
+                doctor_name=doctor.name,
+                appointment_date=appointment.date.strftime('%B %d, %Y'),
+                appointment_time=appointment.time.strftime('%I:%M %p'),
+                reason=appointment.reason or 'General Consultation'
+            )
+            
+            msg = Message(
+                subject='Appointment Confirmation',
+                recipients=[user.email],
+                html=html_body
+            )
+            mail.send(msg)
+            return f"Sent confirmation to {user.username}"
+            
+        except Exception as e:
+            return f"Error sending confirmation: {str(e)}"
+
 @celery.task(name='tasks.send_daily_reminders')
 def send_daily_reminders():
     
@@ -48,7 +86,7 @@ def send_daily_reminders():
                 patient = appointment.patient
                 doctor = appointment.doctor
                 user = User.query.get(patient.user_id)
-                if not user or not user.username: 
+                if not user or not user.email: 
                     continue
                 
             
@@ -62,7 +100,7 @@ def send_daily_reminders():
                 
                 msg = Message(
                     subject='Appointment Reminder - Today',
-                    recipients=[user.username],
+                    recipients=[user.email],
                     html=html_body
                 )
                 mail.send(msg)
@@ -130,7 +168,7 @@ def send_monthly_reports():
                 
                 # Get doctor email
                 user = User.query.get(doctor.user_id)
-                if not user or not user.username:
+                if not user or not user.email:
                     continue
                 
                 # Render email template
@@ -148,7 +186,7 @@ def send_monthly_reports():
                 # Send email
                 msg = Message(
                     subject=f'Monthly Activity Report - {month_year}',
-                    recipients=[user.username],
+                    recipients=[user.email],
                     html=html_body
                 )
                 mail.send(msg)

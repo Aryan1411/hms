@@ -1,0 +1,74 @@
+ 
+ -------------- celery@Aryan v5.5.3 (immunity)
+--- ***** ----- 
+-- ******* ---- Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39 2025-11-29 07:55:40
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         app:0x70f703f34230
+- ** ---------- .> transport:   redis://localhost:6379/0
+- ** ---------- .> results:     redis://localhost:6379/0
+- *** --- * --- .> concurrency: 12 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . tasks.export_patient_treatments
+  . tasks.send_booking_confirmation
+  . tasks.send_daily_reminders
+  . tasks.send_monthly_reports
+
+[2025-11-29 07:55:40,678: WARNING/MainProcess] /home/aryan/code/hms/backend/venv/lib/python3.12/site-packages/celery/app/utils.py:203: CDeprecationWarning: 
+    The 'CELERY_RESULT_BACKEND' setting is deprecated and scheduled for removal in
+    version 6.0.0. Use the result_backend instead
+
+  deprecated.warn(description=f'The {setting!r} setting',
+
+[2025-11-29 07:55:40,679: WARNING/MainProcess] Please run `celery upgrade settings path/to/settings.py` to avoid these warnings and to allow a smoother upgrade to Celery 6.0.
+[2025-11-29 07:55:45,476: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2025-11-29 07:55:45,501: INFO/MainProcess] mingle: searching for neighbors
+[2025-11-29 07:55:46,558: INFO/MainProcess] mingle: all alone
+[2025-11-29 07:55:46,594: INFO/MainProcess] celery@Aryan ready.
+[2025-11-29 07:55:59,317: INFO/MainProcess] Task tasks.send_monthly_reports[5769f1d9-7c89-4594-ba58-ed4803cef63a] received
+[2025-11-29 07:56:03,477: INFO/ForkPoolWorker-6] Task tasks.send_monthly_reports[5769f1d9-7c89-4594-ba58-ed4803cef63a] succeeded in 4.150406773998839s: 'Sent 1 monthly reports to doctors'
+
+Restarting celery worker (./venv/bin/celery -A app.celery worker --loglevel=info)
+ 
+ -------------- celery@Aryan v5.5.3 (immunity)
+--- ***** ----- 
+-- ******* ---- Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39 2025-11-29 08:08:31
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         app:0x7184273b4500
+- ** ---------- .> transport:   redis://localhost:6379/0
+- ** ---------- .> results:     redis://localhost:6379/0
+- *** --- * --- .> concurrency: 12 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . tasks.export_patient_treatments
+  . tasks.send_booking_confirmation
+  . tasks.send_daily_reminders
+  . tasks.send_monthly_reports
+
+[2025-11-29 08:08:31,223: WARNING/MainProcess] /home/aryan/code/hms/backend/venv/lib/python3.12/site-packages/celery/app/utils.py:203: CDeprecationWarning: 
+    The 'CELERY_RESULT_BACKEND' setting is deprecated and scheduled for removal in
+    version 6.0.0. Use the result_backend instead
+
+  deprecated.warn(description=f'The {setting!r} setting',
+
+[2025-11-29 08:08:31,224: WARNING/MainProcess] Please run `celery upgrade settings path/to/settings.py` to avoid these warnings and to allow a smoother upgrade to Celery 6.0.
+[2025-11-29 08:08:45,356: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2025-11-29 08:08:45,391: INFO/MainProcess] mingle: searching for neighbors
+[2025-11-29 08:08:46,456: INFO/MainProcess] mingle: all alone
+[2025-11-29 08:08:46,532: INFO/MainProcess] celery@Aryan ready.
+[2025-11-29 08:11:19,736: INFO/MainProcess] Task tasks.send_booking_confirmation[83ab7d1e-0ace-4b72-ba3b-f18f42a434a5] received
+[2025-11-29 08:11:24,490: INFO/ForkPoolWorker-7] Task tasks.send_booking_confirmation[83ab7d1e-0ace-4b72-ba3b-f18f42a434a5] succeeded in 4.696863970999402s: 'Sent confirmation to golumishra1999@gmail.com'
+[2025-11-29 08:18:50,578: INFO/MainProcess] Task tasks.send_booking_confirmation[c324e173-96a1-45e3-926c-721ae5a4c9c4] received
+[2025-11-29 08:18:55,691: INFO/ForkPoolWorker-7] Task tasks.send_booking_confirmation[c324e173-96a1-45e3-926c-721ae5a4c9c4] succeeded in 5.046595772997534s: 'Sent confirmation to golumishra1999@gmail.com'

@@ -1,7 +1,11 @@
 from flask import Blueprint, jsonify, request
-from application.models import Appointment, Treatment, Availability, Patient, Doctor
+from application.models import Appointment, Treatment, Availability, Patient, Doctor, User
 from application.database import db
-from datetime import datetime
+from datetime import datetime, date, timedelta
+from collections import Counter
+from flask import render_template
+from flask_mail import Message
+from application.tasks import mail
 
 doctor_bp = Blueprint('doctor', __name__)
 
@@ -130,3 +134,93 @@ def update_treatment(treatment_id):
     
     db.session.commit()
     return jsonify({'message': 'Treatment updated successfully'}), 200
+
+@doctor_bp.route('/monthly-report/<int:doctor_id>', methods=['POST'])
+def generate_monthly_report(doctor_id):
+    """Generate and send monthly report for a specific doctor"""
+    try:
+        doctor = Doctor.query.get_or_404(doctor_id)
+        
+        # Calculate last month's date range
+        today = date.today()
+        first_day_this_month = today.replace(day=1)
+        last_day_last_month = first_day_this_month - timedelta(days=1)
+        first_day_last_month = last_day_last_month.replace(day=1)
+        month_year = last_day_last_month.strftime('%B %Y')
+        
+        # Get appointments for last month
+        appointments = Appointment.query.filter(
+            Appointment.doctor_id == doctor.id,
+            Appointment.date >= first_day_last_month,
+            Appointment.date <= today
+        ).all()
+        
+        if not appointments:
+            return jsonify({
+                'message': f'No appointments found for {month_year}',
+                'status': 'info'
+            }), 200
+        
+        # Calculate statistics
+        total_appointments = len(appointments)
+        completed = sum(1 for a in appointments if a.status == 'Completed')
+        cancelled = sum(1 for a in appointments if a.status == 'Cancelled')
+        
+        # Get diagnoses from treatments
+        diagnoses = []
+        for apt in appointments:
+            if apt.treatment and apt.treatment.diagnosis:
+                diagnoses.append(apt.treatment.diagnosis)
+        
+        diagnosis_counts = Counter(diagnoses)
+        top_diagnoses = [{'name': d, 'count': c} for d, c in diagnosis_counts.most_common(5)]
+        
+        # Prepare appointment data for table
+        apt_data = []
+        for apt in appointments[:20]:  # Limit to 20 for email
+            diagnosis = apt.treatment.diagnosis if apt.treatment else 'N/A'
+            apt_data.append({
+                'date': apt.date.strftime('%Y-%m-%d'),
+                'patient': apt.patient.name,
+                'diagnosis': diagnosis,
+                'status': apt.status
+            })
+        
+        # Get doctor email
+        user = User.query.get(doctor.user_id)
+        if not user or not user.username:
+            return jsonify({'message': 'Doctor email not found'}), 404
+        
+        # Render email template
+        html_body = render_template('email/monthly_report.html',
+            doctor_name=doctor.name,
+            month_year=month_year,
+            total_appointments=total_appointments,
+            completed_appointments=completed,
+            cancelled_appointments=cancelled,
+            appointments=apt_data,
+            diagnoses=top_diagnoses,
+            report_date=datetime.now().strftime('%B %d, %Y')
+        )
+        
+        # Send email
+        msg = Message(
+            subject=f'Monthly Activity Report - {month_year}',
+            recipients=[user.username],
+            html=html_body
+        )
+        mail.send(msg)
+        
+        return jsonify({
+            'message': f'Monthly report for {month_year} sent successfully to {user.username}',
+            'status': 'success',
+            'stats': {
+                'total': total_appointments,
+                'completed': completed,
+                'cancelled': cancelled,
+                'month': month_year
+            }
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'message': f'Error generating report: {str(e)}', 'status': 'error'}), 500

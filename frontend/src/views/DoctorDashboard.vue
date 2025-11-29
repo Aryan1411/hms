@@ -3,6 +3,10 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="text-dark">Doctor Dashboard</h2>
       <div>
+        <button class="btn btn-outline-info btn-sm me-2" @click="generateMonthlyReport" :disabled="reportLoading">
+          <i class="bi bi-file-earmark-text"></i> 
+          {{ reportLoading ? 'Sending...' : 'Get Monthly Report' }}
+        </button>
         <button class="btn btn-outline-primary btn-sm me-2" @click="showAvailabilityModal = true">Provide Availability</button>
         <button class="btn btn-outline-danger btn-sm" @click="logout">Logout</button>
       </div>
@@ -162,6 +166,7 @@ export default {
       selectedAppointment: null,
       showAvailabilityModal: false,
       treatment: { diagnosis: '', prescription: '' },
+      reportLoading: false,
       
       // Availability Grid Data
       currentDate: new Date(),
@@ -301,6 +306,37 @@ export default {
         if (res.ok) {
           this.fetchData();
         }
+      }
+    },
+    async generateMonthlyReport() {
+      const doctorId = sessionStorage.getItem('doctor_id');
+      if (!doctorId) {
+        alert('Doctor ID not found. Please login again.');
+        return;
+      }
+      
+      this.reportLoading = true;
+      try {
+        const res = await fetch(`http://localhost:5000/doctor/monthly-report/${doctorId}`, {
+          method: 'POST'
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+          if (data.status === 'info') {
+            alert(data.message);
+          } else {
+            alert(`✅ ${data.message}\n\nStats:\n- Total: ${data.stats.total}\n- Completed: ${data.stats.completed}\n- Cancelled: ${data.stats.cancelled}\n- Month: ${data.stats.month}`);
+          }
+        } else {
+          alert(`Error: ${data.message}`);
+        }
+      } catch (error) {
+        alert('Failed to generate report. Please try again.');
+        console.error('Error:', error);
+      } finally {
+        this.reportLoading = false;
       }
     },
     logout() {
