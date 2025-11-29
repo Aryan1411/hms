@@ -2,7 +2,8 @@ from flask import Blueprint, request, jsonify
 from application.models import User, Patient, Doctor
 from application.database import db
 from datetime import datetime, timedelta
-import jwt
+import  jwt
+
 import os
 
 auth_bp = Blueprint('auth', __name__)

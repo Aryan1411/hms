@@ -120,8 +120,11 @@
       <!-- Patients List -->
       <div class="col-md-6 mb-4">
         <div class="card h-100">
-          <div class="card-header bg-white">
+          <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Patients</h5>
+            <button class="btn btn-sm btn-success" @click="showAddPatientModal = true">
+              <i class="bi bi-plus-circle"></i> Add Patient
+            </button>
           </div>
           <div class="card-body">
             <div class="table-responsive">
@@ -266,6 +269,40 @@
       </div>
     </div>
 
+    <div v-if="showAddPatientModal" class="modal d-block" style="background: rgba(0,0,0,0.5)">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add New Patient</h5>
+            <button type="button" class="btn-close" @click="showAddPatientModal = false"></button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="addPatient">
+              <div class="mb-2">
+                <input type="text" class="form-control" placeholder="Username" v-model="newPatient.username" required>
+              </div>
+              <div class="mb-2">
+                <input type="email" class="form-control" placeholder="Email" v-model="newPatient.email" required>
+              </div>
+              <div class="mb-2">
+                <input type="password" class="form-control" placeholder="Password" v-model="newPatient.password" required>
+              </div>
+              <div class="mb-2">
+                <input type="text" class="form-control" placeholder="Name" v-model="newPatient.name" required>
+              </div>
+              <div class="mb-2">
+                <input type="date" class="form-control" placeholder="Date of Birth" v-model="newPatient.dob">
+              </div>
+              <div class="mb-2">
+                <input type="tel" class="form-control" placeholder="Contact Number" v-model="newPatient.contact">
+              </div>
+              <button type="submit" class="btn btn-success w-100">Create</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div v-if="showEditDoctorModal" class="modal d-block" style="background: rgba(0,0,0,0.5)">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -358,9 +395,18 @@ export default {
       },
       searchQuery: '',
       showAddDoctorModal: false,
+      showAddPatientModal: false,
       showEditDoctorModal: false,
       showEditPatientModal: false,
       newDoctor: { username: '', password: '', name: '', specialization: '', department: '' },
+      newPatient: {
+        username: '',
+        email: '',
+        password: '',
+        name: '',
+        dob: '',
+        contact: ''
+      },
       editingDoctor: { id: null, name: '', specialization: '', department: '' },
       editingPatient: { id: null, name: '', dob: '', contact: '' },
       confirmDialog: {
@@ -429,6 +475,28 @@ export default {
       } else {
         const error = await res.json();
         alert(`Error: ${error.message || 'Failed to add doctor'}`);
+      }
+    },
+    async addPatient() {
+      console.log('Attempting to add patient:', this.newPatient);
+      try {
+        const res = await fetch('http://localhost:5000/admin/patients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(this.newPatient)
+        });
+        if (res.ok) {
+          alert('Patient added successfully');
+          this.showAddPatientModal = false;
+          this.newPatient = { email: '', password: '', name: '', dob: '', contact: '' };
+          this.fetchData();
+        } else {
+          const error = await res.json();
+          alert(`Error: ${error.message || 'Failed to add patient'}`);
+        }
+      } catch (e) {
+        console.error('Error adding patient:', e);
+        alert('Failed to connect to server. Please check console for details.');
       }
     },
     showConfirm(message, callback) {

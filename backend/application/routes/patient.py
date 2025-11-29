@@ -192,7 +192,31 @@ def download_export(filename):
     import application.config as config
     import os
     
+    import sys
+    
+    sys.stderr.write(f"=== DOWNLOAD REQUEST ===\n")
+    sys.stderr.write(f"Requested filename: {filename}\n")
+    sys.stderr.write(f"EXPORT_FOLDER: {config.EXPORT_FOLDER}\n")
+    
     filepath = os.path.join(config.EXPORT_FOLDER, filename)
+    sys.stderr.write(f"Full filepath: {filepath}\n")
+    sys.stderr.write(f"File exists: {os.path.exists(filepath)}\n")
+    
+    if os.path.exists(config.EXPORT_FOLDER):
+        sys.stderr.write(f"Files in export folder:\n")
+        files = os.listdir(config.EXPORT_FOLDER)
+        for f in files:
+            sys.stderr.write(f"  - {f}\n")
+    else:
+        sys.stderr.write(f"Export folder does not exist!\n")
+    
+    sys.stderr.write(f"========================\n")
+    sys.stderr.flush()
+    
+    if not os.path.exists(filepath):
+        return jsonify({'message': 'File not found', 'debug_path': filepath}), 404
+    
+    return send_from_directory(config.EXPORT_FOLDER, filename, as_attachment=True)
     
     if not os.path.exists(filepath):
         return jsonify({'message': 'File not found'}), 404
@@ -239,3 +263,43 @@ def reschedule_appointment(appointment_id):
     
     db.session.commit()
     return jsonify({'message': 'Appointment rescheduled successfully'}), 200
+
+@patient_bp.route('/profile/<int:patient_id>', methods=['GET'])
+def get_patient_profile(patient_id):
+    """Get patient profile information"""
+    patient = Patient.query.get_or_404(patient_id)
+    user = User.query.get(patient.user_id)
+    
+    return jsonify({
+        'name': patient.name,
+        'dob': str(patient.dob) if patient.dob else '',
+        'contact': patient.contact or '',
+        'email': user.email if user else ''
+    })
+
+@patient_bp.route('/profile/<int:patient_id>', methods=['PUT'])
+def update_patient_profile(patient_id):
+    """Update patient profile information"""
+    data = request.get_json()
+    
+    patient = Patient.query.get_or_404(patient_id)
+    user = User.query.get(patient.user_id)
+    
+    # Update patient fields
+    if 'name' in data:
+        patient.name = data['name']
+    if 'dob' in data and data['dob']:
+        try:
+            patient.dob = datetime.strptime(data['dob'], '%Y-%m-%d').date()
+        except:
+            pass
+    if 'contact' in data:
+        patient.contact = data['contact']
+    
+    # Update user email
+    if 'email' in data and user:
+        user.email = data['email']
+    
+    db.session.commit()
+    
+    return jsonify({'message': 'Profile updated successfully'}), 200

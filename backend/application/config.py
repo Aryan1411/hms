@@ -17,5 +17,6 @@ CELERY_TIMEZONE = 'Asia/Kolkata'
 CELERY_ENABLE_UTC = False
 
 # Export Configuration
-EXPORT_FOLDER = 'exports'
+basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+EXPORT_FOLDER = os.path.join(basedir, 'exports')
 EXPORT_FILE_RETENTION_HOURS = 24

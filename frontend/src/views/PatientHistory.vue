@@ -112,6 +112,7 @@ export default {
       appointments: [],
       history: [],
       exporting: false,
+      taskId: null,
       taskId: null
     }
   },
@@ -149,21 +150,19 @@ export default {
       }
     },
     async exportTreatments() {
-      const patientId = sessionStorage.getItem('patient_id');
-      if (!patientId) return;
+      if (this.exporting) return;
       
       this.exporting = true;
+      const patientId = sessionStorage.getItem('patient_id');
       
       try {
-        // Trigger export job
+        // Trigger backend export
         const res = await fetch(`http://localhost:5000/patient/export-treatments/${patientId}`, {
           method: 'POST'
         });
         
         if (!res.ok) {
-          alert('Failed to start export');
-          this.exporting = false;
-          return;
+          throw new Error('Failed to start export');
         }
         
         const data = await res.json();
@@ -171,37 +170,41 @@ export default {
         
         // Poll for completion
         this.checkExportStatus();
-        
       } catch (error) {
-        alert('Error starting export: ' + error.message);
+        console.error('Export error:', error);
+        alert('Failed to start export: ' + error.message);
         this.exporting = false;
       }
     },
+    
     async checkExportStatus() {
-      if (!this.taskId) return;
-      
       try {
         const res = await fetch(`http://localhost:5000/patient/export-status/${this.taskId}`);
         const data = await res.json();
         
         if (data.state === 'SUCCESS') {
-          this.exporting = false;
-          // Download the file
-          const filename = data.result.filename;
-          window.location.href = `http://localhost:5000/patient/download-export/${filename}`;
-          alert(`Export complete! Downloaded ${data.result.record_count} records.`);
+          // Export completed, download the file
+          if (data.result && data.result.status === 'success' && data.result.filename) {
+            const downloadUrl = `http://localhost:5000/patient/download-export/${data.result.filename}`;
+            window.location.href = downloadUrl;
+            this.exporting = false;
+            alert('Export completed! Download started.');
+          } else {
+            throw new Error('Export failed: ' + (data.result.message || 'Unknown error'));
+          }
         } else if (data.state === 'FAILURE') {
-          this.exporting = false;
-          alert('Export failed: ' + data.status);
+          throw new Error('Export failed on server');
         } else {
-          // Still processing, check again in 2 seconds
-          setTimeout(() => this.checkExportStatus(), 2000);
+          // Still processing, check again
+          setTimeout(() => this.checkExportStatus(), 1000);
         }
       } catch (error) {
+        console.error('Export status error:', error);
+        alert('Export failed: ' + error.message);
         this.exporting = false;
-        alert('Error checking export status: ' + error.message);
       }
     }
   }
 }
+
 </script>

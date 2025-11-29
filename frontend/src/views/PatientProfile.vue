@@ -60,17 +60,25 @@ export default {
   methods: {
     async updateProfile() {
       const patientId = sessionStorage.getItem('patient_id');
-      const res = await fetch(`http://localhost:5000/patient/profile/${patientId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(this.profile)
-      });
+      console.log('Updating profile for patient:', patientId, this.profile);
       
-      if (res.ok) {
-        alert('Profile updated successfully!');
-        this.$router.push('/patient');
-      } else {
-        alert('Update failed');
+      try {
+        const res = await fetch(`http://localhost:5000/patient/profile/${patientId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(this.profile)
+        });
+        
+        if (res.ok) {
+          alert('Profile updated successfully!');
+          this.$router.push('/patient');
+        } else {
+          const error = await res.json();
+          alert(`Update failed: ${error.message || 'Unknown error'}`);
+        }
+      } catch (e) {
+        console.error('Error updating profile:', e);
+        alert('Failed to connect to server. Please check console for details.');
       }
     }
   }

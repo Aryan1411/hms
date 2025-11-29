@@ -90,8 +90,35 @@ def delete_doctor(id):
     db.session.commit()
     return jsonify({'message': 'Doctor deleted successfully'}), 200
 
-@admin_bp.route('/patients', methods=['GET'])
-def get_patients():
+@admin_bp.route('/patients', methods=['GET', 'POST'])
+def manage_patients():
+    if request.method == 'POST':
+        data = request.get_json()
+        username = data.get('username')
+        email = data.get('email')
+        password = data.get('password')
+        name = data.get('name')
+        dob = data.get('dob')
+        contact = data.get('contact')
+        
+        if User.query.filter_by(username=username).first():
+            return jsonify({'message': 'Username already exists'}), 400
+        if User.query.filter_by(email=email).first():
+            return jsonify({'message': 'Email already exists'}), 400
+            
+        user = User(username=username, email=email, role='patient')
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        
+        patient = Patient(user_id=user.id, name=name, contact=contact)
+        if dob:
+            from datetime import datetime
+            patient.dob = datetime.strptime(dob, '%Y-%m-%d').date()
+        db.session.add(patient)
+        db.session.commit()
+        return jsonify({'message': 'Patient added'}), 201
+        
     patients = Patient.query.all()
     return jsonify([{
         'id': p.id, 

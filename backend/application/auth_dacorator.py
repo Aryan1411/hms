@@ -1,6 +1,6 @@
 from functools import wraps
 from flask import request, jsonify
-import jwt
+#import jwt
 import os
 
 SECRET_KEY = os.environ.get('secret','This_is_my_secret')

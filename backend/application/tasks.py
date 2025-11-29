@@ -173,7 +173,7 @@ def export_patient_treatments(self, patient_id):
                 return {'status': 'error', 'message': 'Patient not found'}
             
             # Get all treatments for patient
-            treatments = Treatment.query.filter_by(patient_id=patient_id).all()
+            treatments = Treatment.query.join(Appointment).filter(Appointment.patient_id == patient_id).all()
             
             # Creating exports directory if it doesn't exist
             os.makedirs(config.EXPORT_FOLDER, exist_ok=True)
@@ -188,7 +188,7 @@ def export_patient_treatments(self, patient_id):
                 fieldnames = [
                     'Patient ID', 'Patient Name', 'Doctor Name',
                     'Appointment Date', 'Appointment Time', 'Diagnosis',
-                    'Prescription', 'Notes', 'Treatment Date'
+                    'Prescription', 'Notes'
                 ]
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writeheader()
@@ -205,8 +205,7 @@ def export_patient_treatments(self, patient_id):
                         'Appointment Time': appointment.time if appointment else 'N/A',
                         'Diagnosis': treatment.diagnosis or '',
                         'Prescription': treatment.prescription or '',
-                        'Notes': treatment.notes or '',
-                        'Treatment Date': treatment.date
+                        'Notes': treatment.notes or ''
                     })
             
             return {

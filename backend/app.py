@@ -1,4 +1,7 @@
 from flask import Flask
+from dotenv import load_dotenv
+
+load_dotenv()
 from flask_cors import CORS
 from flask_mail import Mail
 from application.database import db
@@ -36,7 +39,7 @@ def create_app():
     app.config['MAIL_PASSWORD'] = config.MAIL_PASSWORD
     app.config['MAIL_DEFAULT_SENDER'] = config.MAIL_DEFAULT_SENDER
 
-    CORS(app)
+    CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True, allow_headers=["Content-Type", "Authorization"], methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
     db.init_app(app)
     
     # Initialize Flask-Mail
@@ -77,4 +80,4 @@ def create_app():
 app, celery = create_app()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
