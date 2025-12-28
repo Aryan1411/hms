@@ -145,4 +145,3 @@ databases:
 
   - name: hms-redis
     plan: free
-    maxmemoryPolicy: noeviction
