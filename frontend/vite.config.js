@@ -26,6 +26,8 @@ export default defineConfig({
   },
   preview: {
     port: 3000,
-    host: true
+    host: true,
+    strictPort: false,
+    allowedHosts: ['.onrender.com']
   }
 })
