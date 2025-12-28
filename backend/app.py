@@ -28,6 +28,9 @@ def make_celery(app):
 def create_app():
     app = Flask(__name__)
     
+    # Secret key for sessions and JWT
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
+    
     # Database configuration - use PostgreSQL on Render, SQLite locally
     database_url = os.getenv('DATABASE_URL')
     if database_url:

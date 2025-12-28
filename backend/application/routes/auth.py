@@ -9,7 +9,7 @@ import os
 auth_bp = Blueprint('auth', __name__)
 
 
-SECRET_KEY = os.environ.get('secret', 'This_is_my_secret')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'This_is_my_secret')
 JWT_EXPIRATION_HOURS = 24
 
 def generate_token(user_id, role):
