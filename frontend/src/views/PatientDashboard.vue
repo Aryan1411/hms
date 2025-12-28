@@ -214,19 +214,19 @@ export default {
     }
   },
   async mounted() {
-    const res = await fetch('http://localhost:5000/patient/departments');
+    const res = await fetch(import.meta.env.VITE_API_URL + '/patient/departments');
     this.departments = await res.json();
   },
   methods: {
     async selectDepartment(dept) {
       this.selectedDepartment = dept;
-      const res = await fetch(`http://localhost:5000/patient/department/${dept}/doctors`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/patient/department/${dept}/doctors`);
       this.doctors = await res.json();
       this.view = 'doctors';
     },
     async checkAvailability(doc) {
       this.selectedDoctor = doc;
-      const res = await fetch(`http://localhost:5000/patient/doctor/${doc.id}/availability`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/patient/doctor/${doc.id}/availability`);
       this.slots = await res.json();
       this.view = 'slots';
     },
@@ -275,7 +275,7 @@ export default {
     async confirmBooking() {
       const patientId = sessionStorage.getItem('patient_id');
       
-      const res = await fetch('http://localhost:5000/patient/book_slot', {
+      const res = await fetch(import.meta.env.VITE_API_URL + '/patient/book_slot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -315,7 +315,7 @@ export default {
         return;
       }
 
-      const res = await fetch(`http://localhost:5000/patient/search?q=${encodeURIComponent(this.searchQuery)}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/patient/search?q=${encodeURIComponent(this.searchQuery)}`);
       if (res.ok) {
         this.searchResults = await res.json();
         this.view = 'search';

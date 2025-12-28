@@ -52,7 +52,7 @@ export default {
       return;
     }
     
-    const res = await fetch(`http://localhost:5000/patient/profile/${patientId}`);
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/patient/profile/${patientId}`);
     if (res.ok) {
       this.profile = await res.json();
     }
@@ -63,7 +63,7 @@ export default {
       console.log('Updating profile for patient:', patientId, this.profile);
       
       try {
-        const res = await fetch(`http://localhost:5000/patient/profile/${patientId}`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/patient/profile/${patientId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(this.profile)

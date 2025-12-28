@@ -119,14 +119,14 @@ export default {
   methods: {
     async loadHistory() {
       const patientId = this.$route.params.id;
-      const res = await fetch(`http://localhost:5000/doctor/patient_history/${patientId}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/doctor/patient_history/${patientId}`);
       if (res.ok) {
         this.history = await res.json();
       }
       
       // Get patient name
       const doctorId = sessionStorage.getItem('doctor_id');
-      const patientsRes = await fetch(`http://localhost:5000/doctor/assigned_patients/${doctorId}`);
+      const patientsRes = await fetch(`${import.meta.env.VITE_API_URL}/doctor/assigned_patients/${doctorId}`);
       if (patientsRes.ok) {
         const patients = await patientsRes.json();
         const patient = patients.find(p => p.id == patientId);
@@ -148,7 +148,7 @@ export default {
       };
     },
     async updateTreatment() {
-      const res = await fetch(`http://localhost:5000/doctor/treatment/${this.editingRecord.id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/doctor/treatment/${this.editingRecord.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
