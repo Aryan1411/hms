@@ -1,5 +1,6 @@
 from flask import Flask
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 from flask_cors import CORS
@@ -26,7 +27,17 @@ def make_celery(app):
 
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hms.db'
+    
+    # Database configuration - use PostgreSQL on Render, SQLite locally
+    database_url = os.getenv('DATABASE_URL')
+    if database_url:
+        # Render uses postgres:// but SQLAlchemy needs postgresql://
+        if database_url.startswith('postgres://'):
+            database_url = database_url.replace('postgres://', 'postgresql://', 1)
+        app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hms.db'
+    
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['CELERY_BROKER_URL'] = config.CELERY_BROKER_URL
     app.config['CELERY_RESULT_BACKEND'] = config.CELERY_RESULT_BACKEND
