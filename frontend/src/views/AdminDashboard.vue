@@ -381,6 +381,7 @@
 </template>
 
 <script>
+import API_BASE_URL from '@/config/api.js';
 export default {
   data() {
     return {
@@ -447,13 +448,13 @@ export default {
   },
   methods: {
     async fetchData() {
-      const doctorsRes = await fetch(import.meta.env.VITE_API_URL + '/admin/doctors');
+      const doctorsRes = await fetch(API_BASE_URL + '/admin/doctors');
       if (doctorsRes.ok) this.doctors = await doctorsRes.json();
       
-      const patientsRes = await fetch(import.meta.env.VITE_API_URL + '/admin/patients');
+      const patientsRes = await fetch(API_BASE_URL + '/admin/patients');
       if (patientsRes.ok) this.patients = await patientsRes.json();
       
-      const appointmentsRes = await fetch(import.meta.env.VITE_API_URL + '/admin/appointments');
+      const appointmentsRes = await fetch(API_BASE_URL + '/admin/appointments');
       if (appointmentsRes.ok) this.appointments = await appointmentsRes.json();
       
       this.stats.totalDoctors = this.doctors.length;
@@ -462,7 +463,7 @@ export default {
       this.stats.totalAppointments = this.appointments.length;
     },
     async addDoctor() {
-      const res = await fetch(import.meta.env.VITE_API_URL + '/admin/doctors', {
+      const res = await fetch(API_BASE_URL + '/admin/doctors', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(this.newDoctor)
@@ -480,7 +481,7 @@ export default {
     async addPatient() {
       console.log('Attempting to add patient:', this.newPatient);
       try {
-        const res = await fetch(import.meta.env.VITE_API_URL + '/admin/patients', {
+        const res = await fetch(API_BASE_URL + '/admin/patients', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(this.newPatient)
@@ -512,7 +513,7 @@ export default {
     },
     async deleteDoctor(id) {
       this.showConfirm('Delete this doctor? This will also delete all their appointments.', async () => {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/doctors/${id}`, { method: 'DELETE' });
+        const res = await fetch(`${API_BASE_URL}/admin/doctors/${id}`, { method: 'DELETE' });
         if (res.ok) {
           alert('Doctor deleted successfully');
           this.fetchData();
@@ -524,7 +525,7 @@ export default {
     },
     async deletePatient(id) {
       this.showConfirm('Delete this patient? This will also delete all their appointments.', async () => {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/patients/${id}`, { method: 'DELETE' });
+        const res = await fetch(`${API_BASE_URL}/admin/patients/${id}`, { method: 'DELETE' });
         if (res.ok) {
           alert('Patient deleted successfully');
           this.fetchData();
@@ -537,7 +538,7 @@ export default {
     async toggleBlacklist(userId, currentStatus) {
       const action = currentStatus ? 'Unblacklist' : 'Blacklist';
       this.showConfirm(`${action} this user?`, async () => {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/blacklist/${userId}`, { method: 'PUT' });
+        const res = await fetch(`${API_BASE_URL}/admin/blacklist/${userId}`, { method: 'PUT' });
         if (res.ok) {
           alert(`User ${action.toLowerCase()}ed successfully`);
           this.fetchData();
@@ -552,7 +553,7 @@ export default {
       this.showEditDoctorModal = true;
     },
     async updateDoctor() {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/doctors/${this.editingDoctor.id}`, {
+      const res = await fetch(`${API_BASE_URL}/admin/doctors/${this.editingDoctor.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(this.editingDoctor)
@@ -570,7 +571,7 @@ export default {
       this.showEditPatientModal = true;
     },
     async updatePatient() {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/patients/${this.editingPatient.id}`, {
+      const res = await fetch(`${API_BASE_URL}/admin/patients/${this.editingPatient.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(this.editingPatient)

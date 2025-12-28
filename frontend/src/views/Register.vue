@@ -27,6 +27,7 @@
 </template>
 
 <script>
+import API_BASE_URL from '@/config/api.js';
 export default {
   data() {
     return {
@@ -38,7 +39,7 @@ export default {
   methods: {
     async register() {
       try {
-        const response = await fetch(import.meta.env.VITE_API_URL + '/auth/register', {
+        const response = await fetch(API_BASE_URL + '/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: this.username, password: this.password, email: this.email })

@@ -158,6 +158,7 @@
 </template>
 
 <script>
+import API_BASE_URL from '@/config/api.js';
 export default {
   data() {
     return {
@@ -207,13 +208,13 @@ export default {
         return;
       }
       
-      const appRes = await fetch(`${import.meta.env.VITE_API_URL}/doctor/appointments/${doctorId}`); 
+      const appRes = await fetch(`${API_BASE_URL}/doctor/appointments/${doctorId}`); 
       if (appRes.ok) this.appointments = await appRes.json();
       
-      const patRes = await fetch(`${import.meta.env.VITE_API_URL}/doctor/assigned_patients/${doctorId}`);
+      const patRes = await fetch(`${API_BASE_URL}/doctor/assigned_patients/${doctorId}`);
       if (patRes.ok) this.assignedPatients = await patRes.json();
       
-      const availRes = await fetch(`${import.meta.env.VITE_API_URL}/patient/doctor/${doctorId}/availability`);
+      const availRes = await fetch(`${API_BASE_URL}/patient/doctor/${doctorId}/availability`);
       if (availRes.ok) this.existingSlots = await availRes.json();
     },
     openTreatment(app) {
@@ -221,7 +222,7 @@ export default {
       this.treatment = { diagnosis: '', prescription: '' };
     },
     async submitTreatment() {
-      const res = await fetch(import.meta.env.VITE_API_URL + '/doctor/treatment', {
+      const res = await fetch(API_BASE_URL + '/doctor/treatment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -238,7 +239,7 @@ export default {
     },
     async cancelAppointment(id) {
       if (!confirm('Cancel this appointment?')) return;
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/doctor/appointments/${id}/cancel`, { method: 'PUT' });
+      const res = await fetch(`${API_BASE_URL}/doctor/appointments/${id}/cancel`, { method: 'PUT' });
       if (res.ok) this.fetchData();
     },
     viewPatientHistory(id) {
@@ -276,7 +277,7 @@ export default {
         if (!confirm('Remove this availability slot?')) return;
         
         const doctorId = sessionStorage.getItem('doctor_id');
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/doctor/availability/${doctorId}/${date}/${time}`, {
+        const res = await fetch(`${API_BASE_URL}/doctor/availability/${doctorId}/${date}/${time}`, {
           method: 'DELETE'
         });
         
@@ -293,7 +294,7 @@ export default {
         let endTimeStr = `${endH.toString().padStart(2, '0')}:00`;
 
         const doctorId = sessionStorage.getItem('doctor_id');
-        const res = await fetch(import.meta.env.VITE_API_URL + '/doctor/availability', {
+        const res = await fetch(API_BASE_URL + '/doctor/availability', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -317,7 +318,7 @@ export default {
       
       this.reportLoading = true;
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/doctor/monthly-report/${doctorId}`, {
+        const res = await fetch(`${API_BASE_URL}/doctor/monthly-report/${doctorId}`, {
           method: 'POST'
         });
         

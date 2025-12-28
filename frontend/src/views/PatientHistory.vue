@@ -105,6 +105,7 @@
 </template>
 
 <script>
+import API_BASE_URL from '@/config/api.js';
 export default {
   data() {
     return {
@@ -128,17 +129,17 @@ export default {
       }
       
       // Fetch appointments
-      const appRes = await fetch(`${import.meta.env.VITE_API_URL}/patient/appointments/${patientId}`);
+      const appRes = await fetch(`${API_BASE_URL}/patient/appointments/${patientId}`);
       if (appRes.ok) this.appointments = await appRes.json();
       
       // Fetch history
-      const histRes = await fetch(`${import.meta.env.VITE_API_URL}/patient/history/${patientId}`);
+      const histRes = await fetch(`${API_BASE_URL}/patient/history/${patientId}`);
       if (histRes.ok) this.history = await histRes.json();
     },
     async cancelAppointment(id) {
       if (!confirm('Are you sure you want to cancel this appointment?')) return;
       
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/patient/appointments/${id}/cancel`, {
+      const res = await fetch(`${API_BASE_URL}/patient/appointments/${id}/cancel`, {
         method: 'PUT'
       });
       
@@ -157,7 +158,7 @@ export default {
       
       try {
         // Trigger backend export
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/patient/export-treatments/${patientId}`, {
+        const res = await fetch(`${API_BASE_URL}/patient/export-treatments/${patientId}`, {
           method: 'POST'
         });
         
@@ -179,13 +180,13 @@ export default {
     
     async checkExportStatus() {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/patient/export-status/${this.taskId}`);
+        const res = await fetch(`${API_BASE_URL}/patient/export-status/${this.taskId}`);
         const data = await res.json();
         
         if (data.state === 'SUCCESS') {
           // Export completed, download the file
           if (data.result && data.result.status === 'success' && data.result.filename) {
-            const downloadUrl = `${import.meta.env.VITE_API_URL}/patient/download-export/${data.result.filename}`;
+            const downloadUrl = `${API_BASE_URL}/patient/download-export/${data.result.filename}`;
             window.location.href = downloadUrl;
             this.exporting = false;
             alert('Export completed! Download started.');
