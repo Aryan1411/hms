@@ -72,3 +72,9 @@ Restarting celery worker (./venv/bin/celery -A app.celery worker --loglevel=info
 [2025-11-29 08:11:24,490: INFO/ForkPoolWorker-7] Task tasks.send_booking_confirmation[83ab7d1e-0ace-4b72-ba3b-f18f42a434a5] succeeded in 4.696863970999402s: 'Sent confirmation to golumishra1999@gmail.com'
 [2025-11-29 08:18:50,578: INFO/MainProcess] Task tasks.send_booking_confirmation[c324e173-96a1-45e3-926c-721ae5a4c9c4] received
 [2025-11-29 08:18:55,691: INFO/ForkPoolWorker-7] Task tasks.send_booking_confirmation[c324e173-96a1-45e3-926c-721ae5a4c9c4] succeeded in 5.046595772997534s: 'Sent confirmation to golumishra1999@gmail.com'
+[2025-11-30 05:16:05,899: INFO/MainProcess] Task tasks.send_booking_confirmation[4bb8190d-ca74-41d7-84f6-08ed2a4bdd55] received
+[2025-11-30 05:16:11,484: INFO/ForkPoolWorker-7] Task tasks.send_booking_confirmation[4bb8190d-ca74-41d7-84f6-08ed2a4bdd55] succeeded in 5.4176426099948s: 'Sent confirmation to golumishra1999@gmail.com'
+[2025-12-02 17:44:10,717: INFO/MainProcess] Task tasks.export_patient_treatments[7df40e58-4c13-44bf-8647-40d6d536e960] received
+[2025-12-02 17:44:12,264: INFO/ForkPoolWorker-7] Task tasks.export_patient_treatments[7df40e58-4c13-44bf-8647-40d6d536e960] succeeded in 1.115343135999865s: {'status': 'success', 'filename': 'patient_2_treatments_20251202_174412.csv', 'filepath': '/home/aryan/code/hms/backend/exports/patient_2_treatments_20251202_174412.csv', 'record_count': 1}
+[2025-12-02 17:48:16,724: INFO/MainProcess] Task tasks.send_booking_confirmation[26845c2c-6059-42c6-b34f-41daaa65322a] received
+[2025-12-02 17:48:23,458: INFO/ForkPoolWorker-7] Task tasks.send_booking_confirmation[26845c2c-6059-42c6-b34f-41daaa65322a] succeeded in 6.5978359450018615s: 'Sent confirmation to avneeshsingjnv@gmail.com'
